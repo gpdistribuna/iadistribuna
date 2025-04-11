@@ -1,8 +1,7 @@
 import streamlit as st
 import os
-from utils.book_processing import get_book_info, process_book, save_book_info
-from utils.auth import check_password
 from utils.book_processing import get_book_info, process_book, save_book_info, delete_book
+from utils.auth import check_password
 
 def load_css():
     with open(".streamlit/style.css") as f:
@@ -16,6 +15,10 @@ st.set_page_config(
 )
 
 def admin_panel():
+    # Limpiar caché de Streamlit al iniciar la página de administración
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    
     left_co, cent_co, last_co = st.columns(3)
     with cent_co:
         st.image("https://distribuna.com/wp-content/uploads/2021/05/GrupoDistribuna_2021_Verde3.png")
@@ -73,12 +76,15 @@ def admin_panel():
             
             with col3:
                 if st.button("🗑️ Eliminar", key=f"delete_{book_id}"):
-        # Usar la función de eliminación completa
+                    # Usar la función de eliminación completa
                     if delete_book(book_id):
                         st.success(f"Libro '{info['title']}' eliminado correctamente.")
-        else:
-            st.error(f"Error al eliminar el libro '{info['title']}'.")
-        st.rerun()
+                    else:
+                        st.error(f"Error al eliminar el libro '{info['title']}'.")
+                    # Limpiar caché después de eliminar
+                    st.cache_data.clear()
+                    st.cache_resource.clear()
+                    st.rerun()
     else:
         st.info("No hay libros disponibles. Sube algunos libros para comenzar.")
 

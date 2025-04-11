@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 # Cargar variables de entorno si existe un archivo .env
 load_dotenv()
 
+# Comprobar si existe la API key de OpenAI
+if not os.getenv("OPENAI_API_KEY"):
+    print("ADVERTENCIA: No se encontró la API key de OpenAI. Las funciones de IA no funcionarán correctamente.")
+
 # Obtener la contraseña desde las variables de entorno o usar una por defecto
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 

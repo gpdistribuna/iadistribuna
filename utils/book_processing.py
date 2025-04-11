@@ -2,6 +2,7 @@ import os
 import json
 import hashlib
 import PyPDF2
+import shutil
 from typing import List, Dict, Any
 
 # Configuración de rutas de almacenamiento
@@ -40,7 +41,12 @@ def create_vector_store(chunks: List[str], book_id: str) -> None:
     from langchain.embeddings import OpenAIEmbeddings
     from langchain.vectorstores import FAISS
     
-    embeddings = OpenAIEmbeddings()
+    # Obtener API key desde variable de entorno
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ValueError("No se encontró la API key de OpenAI. Configura la variable de entorno OPENAI_API_KEY.")
+    
+    embeddings = OpenAIEmbeddings(model="text-embedding-ada-002", openai_api_key=openai_api_key)
     vector_store = FAISS.from_texts(chunks, embeddings)
     
     # Guardar el índice vectorial
@@ -110,7 +116,6 @@ def delete_book(book_id: str) -> bool:
             return False
             
         # Eliminar el directorio de vectores
-        import shutil
         book_vector_dir = os.path.join(VECTOR_DIR, book_id)
         if os.path.exists(book_vector_dir):
             shutil.rmtree(book_vector_dir)

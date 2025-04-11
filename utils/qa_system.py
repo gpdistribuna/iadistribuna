@@ -11,7 +11,13 @@ from utils.book_processing import VECTOR_DIR
 def load_vector_store(book_id: str) -> FAISS:
     """Carga un índice vectorial previamente guardado."""
     book_vector_dir = os.path.join(VECTOR_DIR, book_id)
-    embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
+    
+    # Obtener API key desde variable de entorno
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ValueError("No se encontró la API key de OpenAI. Configura la variable de entorno OPENAI_API_KEY.")
+    
+    embeddings = OpenAIEmbeddings(model="text-embedding-ada-002", openai_api_key=openai_api_key)
     return FAISS.load_local(book_vector_dir, embeddings, allow_dangerous_deserialization=True)
 
 def setup_rag(vector_store: FAISS) -> RetrievalQA:
@@ -42,9 +48,13 @@ def setup_rag(vector_store: FAISS) -> RetrievalQA:
         input_variables=["context", "question"]
     )
     
-    # Configurar el modelo de lenguaje
-    #llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
-    llm = ChatOpenAI(model_name="gpt-4", temperature=0)
+    # Obtener API key desde variable de entorno
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ValueError("No se encontró la API key de OpenAI. Configura la variable de entorno OPENAI_API_KEY.")
+    
+    # Configurar el modelo de lenguaje con API key
+    llm = ChatOpenAI(model_name="gpt-4", temperature=0, openai_api_key=openai_api_key)
     
     # Configurar el sistema RAG
     qa_chain = RetrievalQA.from_chain_type(
@@ -58,4 +68,10 @@ def setup_rag(vector_store: FAISS) -> RetrievalQA:
 
 def answer_question(qa_chain: RetrievalQA, question: str) -> str:
     """Procesa una pregunta y genera una respuesta basada en el contenido del libro."""
-    return qa_chain.run(question)
+    try:
+        return qa_chain.run(question)
+    except Exception as e:
+        if "api_key" in str(e).lower():
+            return "Error: No se pudo conectar con OpenAI. Por favor, verifica la configuración de la API key."
+        else:
+            return f"Error al procesar la pregunta: {str(e)}"

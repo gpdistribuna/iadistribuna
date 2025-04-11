@@ -16,6 +16,10 @@ st.set_page_config(
 )
 
 def user_interface():
+    # Limpiar caché al iniciar la página para asegurar datos actualizados
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    
     left_co, cent_co, last_co = st.columns(3)
     with cent_co:
         st.image("https://distribuna.com/wp-content/uploads/2021/05/GrupoDistribuna_2021_Verde3.png")
@@ -41,7 +45,7 @@ def user_interface():
                 # Si el default también es inválido, usar el primer libro
                 book_id = list(book_info.keys())[0]
     except Exception as e:
-        st.info.error(f"Error procesando parámetros: {str(e)}")
+        st.error(f"Error procesando parámetros: {str(e)}")
         # Usar el primer libro como fallback
         if book_info:
             book_id = list(book_info.keys())[0]
@@ -80,20 +84,25 @@ def user_interface():
     if search_button and question:
         with st.spinner("Buscando respuesta..."):
             try:
-                # Cargar el índice vectorial del libro
-                vector_store = load_vector_store(book_id)
-                
-                # Configurar el sistema RAG
-                qa_system = setup_rag(vector_store)
-                
-                # Generar respuesta
-                answer = answer_question(qa_system, question)
-                
-                # Guardar en historial específico del libro
-                st.session_state.history[book_id].append({
-                    "question": question,
-                    "answer": answer
-                })
+                # Verificar la API key de OpenAI
+                openai_api_key = os.getenv("OPENAI_API_KEY")
+                if not openai_api_key:
+                    st.error("No se encontró la API key de OpenAI. Contacte al administrador del sistema.")
+                else:
+                    # Cargar el índice vectorial del libro
+                    vector_store = load_vector_store(book_id)
+                    
+                    # Configurar el sistema RAG
+                    qa_system = setup_rag(vector_store)
+                    
+                    # Generar respuesta
+                    answer = answer_question(qa_system, question)
+                    
+                    # Guardar en historial específico del libro
+                    st.session_state.history[book_id].append({
+                        "question": question,
+                        "answer": answer
+                    })
             except Exception as e:
                 st.error(f"Error al procesar tu pregunta: {str(e)}")
     
