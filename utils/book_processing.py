@@ -92,6 +92,38 @@ def process_book(pdf_path: str, title: str, author: str) -> str:
     
     return book_id
 
+def delete_book(book_id: str) -> bool:
+    """Elimina completamente un libro del sistema.
+    
+    Args:
+        book_id: El ID del libro a eliminar
+        
+    Returns:
+        bool: True si se eliminó correctamente, False en caso contrario
+    """
+    try:
+        # Obtener información actual de libros
+        book_info = get_book_info()
+        
+        # Verificar que el libro exista
+        if book_id not in book_info:
+            return False
+            
+        # Eliminar el directorio de vectores
+        import shutil
+        book_vector_dir = os.path.join(VECTOR_DIR, book_id)
+        if os.path.exists(book_vector_dir):
+            shutil.rmtree(book_vector_dir)
+            
+        # Eliminar la entrada del JSON
+        del book_info[book_id]
+        save_book_info(book_info)
+        
+        return True
+    except Exception as e:
+        print(f"Error al eliminar libro: {str(e)}")
+        return False
+
 def get_default_book_id() -> str:
     """Obtiene el ID del primer libro disponible."""
     book_info = get_book_info()
