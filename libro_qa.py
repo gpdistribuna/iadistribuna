@@ -18,7 +18,7 @@ from langchain.prompts import PromptTemplate
 import streamlit as st
 
 # Configurar la API key de OpenAI
-os.environ["OPENAI_API_KEY"] = "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"  # Reemplaza con tu API key
+os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
 # Configuración de rutas de almacenamiento
 DATA_DIR = "data"
