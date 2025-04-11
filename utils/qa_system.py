@@ -34,6 +34,7 @@ def setup_rag(vector_store: FAISS) -> RetrievalQA:
     
     Instrucciones:
     - Responde solo con información que esté explícitamente presente en el contexto proporcionado.
+    - Si te preguntan el nombre del libro, generalmente está en las primeras 3 páginas del pdf.
     - Si la información no está en el contexto, indica: "No puedo responder esta pregunta basándome en el contenido del libro."
     - No inventes información ni uses conocimiento externo.
     - Cita capítulos, secciones o páginas específicas cuando sea posible.
