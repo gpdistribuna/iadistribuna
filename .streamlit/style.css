@@ -1,0 +1,108 @@
+/* Estilos generales */
+body {
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    background-color: #ffffff;
+}
+
+/* Encabezados */
+h1, h2, h3 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 2.2rem;
+    color: #6c5ce7;
+    margin-bottom: 1.5rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: #4834d4;
+}
+
+h3 {
+    font-size: 1.1rem;
+    color: #5e60ce;
+}
+
+/* Cajas de texto */
+.stTextInput, .stTextArea {
+    border-radius: 8px;
+}
+
+/* Botones */
+.stButton > button {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Expansores */
+.streamlit-expanderHeader {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #4834d4;
+}
+
+/* Widgets */
+.stSelectbox, .stMultiselect {
+    border-radius: 8px;
+}
+
+/* Cards para información */
+div[data-testid="stExpander"] {
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1rem;
+}
+
+/* Barra lateral 
+section[data-testid="stSidebar"] {
+    background-color: #f8f9fa;
+    border-right: 1px solid #f0f0f0;
+}*/
+
+/* Espacio entre elementos */
+div.stButton {
+    margin-top: 1rem;
+}
+
+/* Líneas divisorias */
+hr {
+    margin: 2rem 0;
+    border: none;
+    height: 1px;
+    background-color: #f0f0f0;
+}
+
+/* Mejoras para la página de usuarios */
+.book-header {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    border-left: 5px solid #6c5ce7;
+}
+
+/* Respuestas */
+.response-container {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border-left: 3px solid #6c5ce7;
+}
+/* Ocultar barra lateral completamente */
+[data-testid="stSidebar"] {
+    display: none !important;
+}
