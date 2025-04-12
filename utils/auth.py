@@ -6,8 +6,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Comprobar si existe la API key de OpenAI
-if not os.getenv("OPENAI_API_KEY"):
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
     print("ADVERTENCIA: No se encontró la API key de OpenAI. Las funciones de IA no funcionarán correctamente.")
+else:
+    # Solo mostrar los primeros 5 y últimos 4 caracteres por seguridad
+    print(f"API key encontrada: {api_key[:5]}...{api_key[-4:]}")
+    # Verificar el formato
+    if api_key.startswith("sk-"):
+        print("El formato de la API key parece correcto.")
+    else:
+        print("ADVERTENCIA: El formato de la API key no parece correcto.")
 
 # Obtener la contraseña desde las variables de entorno o usar una por defecto
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")

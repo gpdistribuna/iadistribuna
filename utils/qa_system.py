@@ -1,9 +1,9 @@
-from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 import os
+from langchain.embeddings.openai import OpenAIEmbeddings
 
 # Importar variables necesarias
 from utils.book_processing import VECTOR_DIR
@@ -17,7 +17,11 @@ def load_vector_store(book_id: str) -> FAISS:
     if not openai_api_key:
         raise ValueError("No se encontró la API key de OpenAI. Configura la variable de entorno OPENAI_API_KEY.")
     
-    embeddings = OpenAIEmbeddings(model="text-embedding-ada-002", openai_api_key=openai_api_key)
+    # Para OpenAI API 1.0+
+    embeddings = OpenAIEmbeddings(
+        model="text-embedding-ada-002", 
+        openai_api_key=openai_api_key
+    )
     return FAISS.load_local(book_vector_dir, embeddings, allow_dangerous_deserialization=True)
 
 def setup_rag(vector_store: FAISS) -> RetrievalQA:
@@ -54,8 +58,12 @@ def setup_rag(vector_store: FAISS) -> RetrievalQA:
     if not openai_api_key:
         raise ValueError("No se encontró la API key de OpenAI. Configura la variable de entorno OPENAI_API_KEY.")
     
-    # Configurar el modelo de lenguaje con API key
-    llm = ChatOpenAI(model_name="gpt-4", temperature=0, openai_api_key=openai_api_key)
+    # Configurar el modelo de lenguaje con API key para versión 1.0+
+    llm = ChatOpenAI(
+        model_name="gpt-4", 
+        temperature=0, 
+        openai_api_key=openai_api_key
+    )
     
     # Configurar el sistema RAG
     qa_chain = RetrievalQA.from_chain_type(
@@ -72,7 +80,7 @@ def answer_question(qa_chain: RetrievalQA, question: str) -> str:
     try:
         return qa_chain.run(question)
     except Exception as e:
-        if "api_key" in str(e).lower():
+        if "api_key" in str(e).lower() or "auth" in str(e).lower():
             return "Error: No se pudo conectar con OpenAI. Por favor, verifica la configuración de la API key."
         else:
             return f"Error al procesar la pregunta: {str(e)}"

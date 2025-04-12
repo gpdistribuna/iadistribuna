@@ -38,7 +38,7 @@ def split_text_into_chunks(text: str) -> List[str]:
 
 def create_vector_store(chunks: List[str], book_id: str) -> None:
     """Crea un índice de vectores y lo guarda en disco."""
-    from langchain.embeddings import OpenAIEmbeddings
+    from langchain.embeddings.openai import OpenAIEmbeddings
     from langchain.vectorstores import FAISS
     
     # Obtener API key desde variable de entorno
@@ -46,7 +46,11 @@ def create_vector_store(chunks: List[str], book_id: str) -> None:
     if not openai_api_key:
         raise ValueError("No se encontró la API key de OpenAI. Configura la variable de entorno OPENAI_API_KEY.")
     
-    embeddings = OpenAIEmbeddings(model="text-embedding-ada-002", openai_api_key=openai_api_key)
+    # Para OpenAI API 1.0+
+    embeddings = OpenAIEmbeddings(
+        model="text-embedding-ada-002", 
+        openai_api_key=openai_api_key
+    )
     vector_store = FAISS.from_texts(chunks, embeddings)
     
     # Guardar el índice vectorial
