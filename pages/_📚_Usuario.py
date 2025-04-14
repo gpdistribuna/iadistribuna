@@ -40,18 +40,19 @@ def user_interface():
               
         # Verificar si el book_id existe en los libros disponibles
         if not book_id or book_id not in book_info:
-            book_id = get_default_book_id()
-            if book_id not in book_info and book_info:
-                # Si el default también es inválido, usar el primer libro
-                book_id = list(book_info.keys())[0]
+            # En lugar de mostrar un libro por defecto, mostrar un mensaje informativo
+            st.warning("⚠️ No tienes acceso a este recurso.")
+            st.info("Por favor, usa el enlace proporcionado para acceder a un libro específico.")
+            st.markdown("""
+            ### Información
+            Para consultar un libro, necesitas un enlace específico. 
+            Si necesitas acceso a un libro particular, contacta con el administrador del sistema.
+            """)
+            return
     except Exception as e:
         st.error(f"Error procesando parámetros: {str(e)}")
-        # Usar el primer libro como fallback
-        if book_info:
-            book_id = list(book_info.keys())[0]
-        else:
-            st.error("Error al cargar libros.")
-            return
+        st.info("Por favor, usa el enlace proporcionado para acceder a un libro específico.")
+        return
       
     # Mostrar información del libro seleccionado
     selected_book = book_info[book_id]

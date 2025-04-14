@@ -19,12 +19,17 @@ def main():
     st.title("Grupo Distribuna IA 📚")
     
     st.markdown("""
-    Bienvenido al sistema de consultas. Te permite hacer preguntas
+    Bienvenido al sistema de consultas de Grupo Distribuna. Este sistema te permite hacer preguntas
     sobre libros específicos y recibir respuestas basadas únicamente en su contenido.
     
-    ### Para empezar:
-    - Debes contar un un enlace que te vincula al contexto del libro.
-    - Si no cuentas con dicho enlace, contacta con el administrador del sistema para mayor información.
+    ### Información importante:
+     - Para consultar un libro, necesitas un enlace específico proporcionado por el administrador.
+    - Cada enlace te da acceso exclusivo al contenido de un libro en particular.
+    - Sin el enlace correcto, no podrás acceder a la vista de consultas.
+    
+    ### ¿Necesitas acceso?
+    Si necesitas acceder a un libro disponible en nuestro sistema, contacta con el administrador para recibir tu enlace personalizado.
+    
     """)
     
     # Mostrar libros disponibles
