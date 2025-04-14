@@ -4,6 +4,9 @@ import hashlib
 import PyPDF2
 import shutil
 from typing import List, Dict, Any
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # Configuración de rutas de almacenamiento
 DATA_DIR = "data"
@@ -48,7 +51,8 @@ def create_vector_store(chunks: List[str], book_id: str) -> None:
     
     # Para OpenAI API 1.0+
     embeddings = OpenAIEmbeddings(
-        model="text-embedding-ada-002", 
+        model="text-embedding-3-large",
+        #model="text-embedding-3-small",
         openai_api_key=openai_api_key
     )
     vector_store = FAISS.from_texts(chunks, embeddings)

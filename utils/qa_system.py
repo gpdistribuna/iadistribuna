@@ -3,7 +3,8 @@ from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 import os
-from langchain.embeddings.openai import OpenAIEmbeddings
+#from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 
 # Importar variables necesarias
 from utils.book_processing import VECTOR_DIR
@@ -19,7 +20,7 @@ def load_vector_store(book_id: str) -> FAISS:
     
     # Para OpenAI API 1.0+
     embeddings = OpenAIEmbeddings(
-        model="text-embedding-ada-002", 
+        model="text-embedding-3-large", 
         openai_api_key=openai_api_key
     )
     return FAISS.load_local(book_vector_dir, embeddings, allow_dangerous_deserialization=True)

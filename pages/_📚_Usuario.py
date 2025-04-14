@@ -4,6 +4,7 @@ import json
 from langchain.embeddings import OpenAIEmbeddings
 from utils.book_processing import get_book_info, get_default_book_id
 from utils.qa_system import load_vector_store, setup_rag, answer_question
+from langchain_openai import OpenAIEmbeddings
 
 def load_css():
     with open(".streamlit/style.css") as f:
