@@ -3,15 +3,45 @@ from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 import os
+from utils.azure_storage import download_blob, list_blobs
+import tempfile
+import shutil
 #from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
 
 # Importar variables necesarias
 from utils.book_processing import VECTOR_DIR
 
+#def load_vector_store(book_id: str) -> FAISS:
+#    """Carga un índice vectorial previamente guardado."""
+#    book_vector_dir = os.path.join(VECTOR_DIR, book_id)
+    
+    # Obtener API key desde variable de entorno
+#    openai_api_key = os.getenv("OPENAI_API_KEY")
+#    if not openai_api_key:
+#        raise ValueError("No se encontró la API key de OpenAI. Configura la variable de entorno OPENAI_API_KEY.")
+    
+    # Para OpenAI API 1.0+
+#    embeddings = OpenAIEmbeddings(
+#        model="text-embedding-3-large", 
+#        openai_api_key=openai_api_key
+#    )
+#    return FAISS.load_local(book_vector_dir, embeddings, allow_dangerous_deserialization=True)
 def load_vector_store(book_id: str) -> FAISS:
-    """Carga un índice vectorial previamente guardado."""
-    book_vector_dir = os.path.join(VECTOR_DIR, book_id)
+    """Carga un índice vectorial previamente guardado desde Azure Blob Storage."""
+    # Crear directorio temporal para trabajar
+    temp_dir = tempfile.mkdtemp()
+    vector_dir = os.path.join(temp_dir, book_id)
+    os.makedirs(vector_dir, exist_ok=True)
+    
+    # Descargar todos los archivos asociados con este libro
+    blob_prefix = f"vector_stores/{book_id}"
+    blob_files = list_blobs(blob_prefix)
+    
+    for blob_name in blob_files:
+        local_path = os.path.join(temp_dir, blob_name.replace("vector_stores/", ""))
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        download_blob(blob_name, local_path)
     
     # Obtener API key desde variable de entorno
     openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -23,7 +53,13 @@ def load_vector_store(book_id: str) -> FAISS:
         model="text-embedding-3-large", 
         openai_api_key=openai_api_key
     )
-    return FAISS.load_local(book_vector_dir, embeddings, allow_dangerous_deserialization=True)
+    
+    # Cargar el vector store
+    vector_store = FAISS.load_local(vector_dir, embeddings, allow_dangerous_deserialization=True)
+    
+    # Programar la limpieza del directorio temporal
+    # No eliminamos inmediatamente porque FAISS podría necesitar acceder a los archivos
+    return vector_store
 
 def setup_rag(vector_store: FAISS) -> RetrievalQA:
     """Configura el sistema RAG con el índice de vectores."""

@@ -7,6 +7,8 @@ from typing import List, Dict, Any
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from utils.azure_storage import save_json_to_blob, load_json_from_blob, upload_blob, download_blob, delete_blob, list_blobs, blob_exists
+import tempfile
 
 # Configuración de rutas de almacenamiento
 DATA_DIR = "data"
@@ -39,42 +41,68 @@ def split_text_into_chunks(text: str) -> List[str]:
     )
     return text_splitter.split_text(text)
 
-def create_vector_store(chunks: List[str], book_id: str) -> None:
-    """Crea un índice de vectores y lo guarda en disco."""
-    from langchain.embeddings.openai import OpenAIEmbeddings
-    from langchain.vectorstores import FAISS
+#def create_vector_store(chunks: List[str], book_id: str) -> None:
+#    """Crea un índice de vectores y lo guarda en disco."""
+#    from langchain.embeddings.openai import OpenAIEmbeddings
+#    from langchain.vectorstores import FAISS
     
     # Obtener API key desde variable de entorno
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    if not openai_api_key:
-        raise ValueError("No se encontró la API key de OpenAI. Configura la variable de entorno OPENAI_API_KEY.")
+#    openai_api_key = os.getenv("OPENAI_API_KEY")
+#    if not openai_api_key:
+#        raise ValueError("No se encontró la API key de OpenAI. Configura la variable de entorno OPENAI_API_KEY.")
     
     # Para OpenAI API 1.0+
-    embeddings = OpenAIEmbeddings(
-        model="text-embedding-3-large",
-        #model="text-embedding-3-small",
-        openai_api_key=openai_api_key
-    )
-    vector_store = FAISS.from_texts(chunks, embeddings)
+#    embeddings = OpenAIEmbeddings(
+#        model="text-embedding-3-large",
+#        #model="text-embedding-3-small",
+#        openai_api_key=openai_api_key
+#    )
+#    vector_store = FAISS.from_texts(chunks, embeddings)
     
     # Guardar el índice vectorial
-    book_vector_dir = os.path.join(VECTOR_DIR, book_id)
-    os.makedirs(book_vector_dir, exist_ok=True)
-    vector_store.save_local(book_vector_dir)
+#    book_vector_dir = os.path.join(VECTOR_DIR, book_id)
+#    os.makedirs(book_vector_dir, exist_ok=True)
+#    vector_store.save_local(book_vector_dir)
     
-    return book_vector_dir
+#    return book_vector_dir
+def create_vector_store(chunks: List[str], book_id: str) -> None:
+    """Crea un índice de vectores y lo guarda en Azure Blob Storage."""
+    # Código original para OpenAI API, etc.
+    
+    # Al final, en lugar de guardar localmente
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Guardar temporalmente en disco
+        book_vector_dir = os.path.join(temp_dir, book_id)
+        os.makedirs(book_vector_dir, exist_ok=True)
+        vector_store.save_local(book_vector_dir)
+        
+        # Subir a Azure Blob Storage
+        for root, dirs, files in os.walk(book_vector_dir):
+            for file in files:
+                local_path = os.path.join(root, file)
+                relative_path = os.path.relpath(local_path, temp_dir)
+                blob_path = f"vector_stores/{relative_path}"
+                upload_blob(local_path, blob_path)
+    
+    return f"vector_stores/{book_id}"
 
+#def get_book_info() -> Dict:
+#    """Carga la información de los libros disponibles."""
+#    if os.path.exists(BOOK_INFO_FILE):
+#        with open(BOOK_INFO_FILE, 'r') as f:
+#            return json.load(f)
+#    return {}
 def get_book_info() -> Dict:
-    """Carga la información de los libros disponibles."""
-    if os.path.exists(BOOK_INFO_FILE):
-        with open(BOOK_INFO_FILE, 'r') as f:
-            return json.load(f)
-    return {}
+    """Carga la información de los libros disponibles desde Azure Blob Storage."""
+    return load_json_from_blob("books_info.json")
 
+#def save_book_info(book_info: Dict) -> None:
+#    """Guarda la información de los libros."""
+#    with open(BOOK_INFO_FILE, 'w') as f:
+#        json.dump(book_info, f)
 def save_book_info(book_info: Dict) -> None:
-    """Guarda la información de los libros."""
-    with open(BOOK_INFO_FILE, 'w') as f:
-        json.dump(book_info, f)
+    """Guarda la información de los libros en Azure Blob Storage."""
+    save_json_to_blob(book_info, "books_info.json")
 
 def process_book(pdf_path: str, title: str, author: str) -> str:
     """Procesa un libro y guarda su índice vectorial."""
@@ -106,15 +134,38 @@ def process_book(pdf_path: str, title: str, author: str) -> str:
     
     return book_id
 
-def delete_book(book_id: str) -> bool:
-    """Elimina completamente un libro del sistema.
+#def delete_book(book_id: str) -> bool:
+#    """Elimina completamente un libro del sistema.
     
-    Args:
-        book_id: El ID del libro a eliminar
+#    Args:
+#        book_id: El ID del libro a eliminar
         
-    Returns:
-        bool: True si se eliminó correctamente, False en caso contrario
-    """
+#    Returns:
+#        bool: True si se eliminó correctamente, False en caso contrario
+#    """
+#    try:
+        # Obtener información actual de libros
+#        book_info = get_book_info()
+        
+        # Verificar que el libro exista
+#        if book_id not in book_info:
+#            return False
+            
+        # Eliminar el directorio de vectores
+#        book_vector_dir = os.path.join(VECTOR_DIR, book_id)
+#        if os.path.exists(book_vector_dir):
+#            shutil.rmtree(book_vector_dir)
+            
+        # Eliminar la entrada del JSON
+#        del book_info[book_id]
+#        save_book_info(book_info)
+        
+#        return True
+#    except Exception as e:
+#        print(f"Error al eliminar libro: {str(e)}")
+#        return False
+def delete_book(book_id: str) -> bool:
+    """Elimina completamente un libro del sistema."""
     try:
         # Obtener información actual de libros
         book_info = get_book_info()
@@ -123,10 +174,10 @@ def delete_book(book_id: str) -> bool:
         if book_id not in book_info:
             return False
             
-        # Eliminar el directorio de vectores
-        book_vector_dir = os.path.join(VECTOR_DIR, book_id)
-        if os.path.exists(book_vector_dir):
-            shutil.rmtree(book_vector_dir)
+        # Eliminar todos los blobs asociados al libro
+        blobs_to_delete = list_blobs(f"vector_stores/{book_id}")
+        for blob_name in blobs_to_delete:
+            delete_blob(blob_name)
             
         # Eliminar la entrada del JSON
         del book_info[book_id]
@@ -136,6 +187,7 @@ def delete_book(book_id: str) -> bool:
     except Exception as e:
         print(f"Error al eliminar libro: {str(e)}")
         return False
+
 
 def get_default_book_id() -> str:
     """Obtiene el ID del primer libro disponible."""
