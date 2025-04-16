@@ -19,13 +19,12 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-          # PASO 1: Iniciar sesión en Azure (Asegúrate de que este paso ya exista o añádelo)
+      # PASO 1: Iniciar sesión en Azure (Asegúrate de que este paso ya exista o añádelo)
       # Utiliza el secreto AZURE_CREDENTIALS que el portal debió crear automáticamente.
     - name: Log in to Azure
       uses: azure/login@v1
       with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       # PASO 2: Iniciar sesión en Azure Container Registry (ACR)
       # Este comando utiliza la sesión de Azure iniciada en el paso anterior.
       # Reemplaza el bloque 'docker/login-action@v2' con este.
@@ -44,7 +43,6 @@ jobs:
           # Opcional: Si también necesitas 'latest'
           # docker tag $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
           # docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
-
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
