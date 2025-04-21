@@ -49,7 +49,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: distribunaia.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_c9cc71f19e814b8e8dcbb27ebbb2a1a8 }}/libro-app:${{ github.sha }}
+        tags: distribunaia.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_c9cc71f19e814b8e8dcbb27ebbb2a1a8 }}libro-app:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
