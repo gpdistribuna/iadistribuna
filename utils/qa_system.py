@@ -10,7 +10,7 @@ import shutil
 from langchain_openai import OpenAIEmbeddings
 
 # Importar variables necesarias
-from utils.book_processing import VECTOR_DIR
+#from utils.book_processing import VECTOR_DIR
 
 #def load_vector_store(book_id: str) -> FAISS:
 #    """Carga un índice vectorial previamente guardado."""
