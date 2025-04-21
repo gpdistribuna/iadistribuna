@@ -97,7 +97,7 @@ def setup_rag(vector_store: FAISS) -> RetrievalQA:
     
     # Configurar el modelo de lenguaje con API key para versión 1.0+
     llm = ChatOpenAI(
-        model_name="gpt-4", 
+        model_name="gpt-3.5-turbo", 
         temperature=0, 
         openai_api_key=openai_api_key
     )
