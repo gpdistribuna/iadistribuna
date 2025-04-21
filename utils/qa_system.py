@@ -75,13 +75,16 @@ def setup_rag(vector_store: FAISS) -> RetrievalQA:
     
     Instrucciones:
     - Responde solo con información que esté explícitamente presente en el contexto proporcionado.
+    - Proporciona una respuesta completa y elaborada, no te limites a una respuesta corta.
+    - Explica tu respuesta con suficiente detalle, incluyendo puntos relevantes del contexto.
     - Si la información no está en el contexto, indica: "No puedo responder esta pregunta basándome en el contenido del libro."
     - No inventes información ni uses conocimiento externo.
     - Cita capítulos, secciones o páginas específicas cuando sea posible.
     - Proporciona una respuesta clara, concisa y directa.
     - Indica la página de donde sacaste la información siempre que sea posible.
+    - Asegúrate de que tu respuesta sea exhaustiva y cubra los aspectos importantes de la pregunta según el contexto.
     
-    Respuesta:
+    Respuesta detallada:
     """
     
     PROMPT = PromptTemplate(
@@ -105,8 +108,9 @@ def setup_rag(vector_store: FAISS) -> RetrievalQA:
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
-        retriever=vector_store.as_retriever(search_kwargs={"k": 4}),
+        retriever=vector_store.as_retriever(search_kwargs={"k": 5}),
         chain_type_kwargs={"prompt": PROMPT}
+        return_source_documents=False
     )
     
     return qa_chain
