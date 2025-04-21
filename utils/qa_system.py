@@ -109,7 +109,7 @@ def setup_rag(vector_store: FAISS) -> RetrievalQA:
         llm=llm,
         chain_type="stuff",
         retriever=vector_store.as_retriever(search_kwargs={"k": 5}),
-        chain_type_kwargs={"prompt": PROMPT}
+        chain_type_kwargs={"prompt": PROMPT},
         return_source_documents=False
     )
     
