@@ -9,6 +9,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from utils.azure_storage import save_json_to_blob, load_json_from_blob, upload_blob, download_blob, delete_blob, list_blobs, blob_exists
 import tempfile
+import streamlit as st
 
 # Configuración de rutas de almacenamiento
 DATA_DIR = "data"
@@ -65,26 +66,7 @@ def split_text_into_chunks(text: str) -> List[str]:
 #    vector_store.save_local(book_vector_dir)
     
 #    return book_vector_dir
-def create_vector_store(chunks: List[str], book_id: str) -> None:
-    """Crea un índice de vectores y lo guarda en Azure Blob Storage."""
-    # Código original para OpenAI API, etc.
-    
-    # Al final, en lugar de guardar localmente
-    with tempfile.TemporaryDirectory() as temp_dir:
-        # Guardar temporalmente en disco
-        book_vector_dir = os.path.join(temp_dir, book_id)
-        os.makedirs(book_vector_dir, exist_ok=True)
-        vector_store.save_local(book_vector_dir)
-        
-        # Subir a Azure Blob Storage
-        for root, dirs, files in os.walk(book_vector_dir):
-            for file in files:
-                local_path = os.path.join(root, file)
-                relative_path = os.path.relpath(local_path, temp_dir)
-                blob_path = f"vector_stores/{relative_path}"
-                upload_blob(local_path, blob_path)
-    
-    return f"vector_stores/{book_id}"
+
 
 #def get_book_info() -> Dict:
 #    """Carga la información de los libros disponibles."""
@@ -104,35 +86,59 @@ def save_book_info(book_info: Dict) -> None:
     """Guarda la información de los libros en Azure Blob Storage."""
     save_json_to_blob(book_info, "books_info.json")
 
-def process_book(pdf_path: str, title: str, author: str) -> str:
-    """Procesa un libro y guarda su índice vectorial."""
-    import streamlit as st
-    
-    # Crear un ID único para el libro
-    book_id = hashlib.md5(f"{title}_{author}".encode()).hexdigest()
-    
-    # Extraer texto del PDF
-    st.info("Extrayendo texto del PDF...")
-    text = extract_text_from_pdf(pdf_path)
-    
-    # Dividir en fragmentos
-    st.info("Dividiendo el texto en fragmentos...")
-    chunks = split_text_into_chunks(text)
-    
-    # Crear y guardar el índice vectorial
-    st.info("Creando índice vectorial...")
-    vector_dir = create_vector_store(chunks, book_id)
-    
-    # Actualizar la información del libro
-    book_info = get_book_info()
-    book_info[book_id] = {
-        "title": title,
-        "author": author,
-        "vector_dir": vector_dir
-    }
-    save_book_info(book_info)
-    
-    return book_id
+def process_book(pdf_path: str, title: str, author: str) -> str | None:
+    """
+    Procesa un libro PDF completo. Devuelve el book_id si tiene éxito, None si falla.
+    Maneja excepciones internas y muestra errores en Streamlit.
+    """
+    try:
+        print(f"[Debug] Procesando libro: Título='{title}', Autor='{author}'")
+        # Generar ID único para el libro
+        book_id = hashlib.md5((title + author + pdf_path).encode()).hexdigest() # Añadir pdf_path para más unicidad
+        print(f"[Debug] Generado book_id: {book_id}")
+
+        # 1. Extraer texto
+        print("[Debug] Extrayendo texto del PDF...")
+        text = extract_text_from_pdf(pdf_path)
+        print(f"[Debug] Longitud del texto extraído: {len(text)}")
+        if not text or len(text) < 10: # Añadir chequeo básico de longitud
+            print("ERROR: Fallo al extraer texto o PDF vacío.")
+            raise ValueError("Fallo al extraer texto del PDF o el PDF está vacío.")
+
+        # 2. Dividir texto en chunks
+        print("[Debug] Dividiendo texto en chunks...")
+        chunks = split_text_into_chunks(text)
+        print(f"[Debug] Dividido en {len(chunks)} chunks.")
+        if not chunks:
+             print("ERROR: La división del texto resultó en cero chunks.")
+             raise ValueError("La división del texto resultó en cero chunks.")
+
+        # 3. Crear y guardar vector store (puede lanzar excepción)
+        print("[Debug] Creando vector store...")
+        create_vector_store(chunks, book_id) # Ya no devuelve ruta, lanza excepción si falla
+        print(f"[Debug] Vector store creado y subido a Azure para book_id: {book_id}")
+
+        # 4. Guardar información del libro
+        print("[Debug] Guardando información del libro...")
+        book_info = get_book_info()
+        book_info[book_id] = {"title": title, "author": author}
+        if not save_book_info(book_info):
+             # Considerar si esto debe ser un error fatal o solo una advertencia
+             print(f"[Advertencia] Fallo al guardar la info del libro {book_id} en Azure.")
+             st.warning(f"Se procesó el contenido del libro '{title}', pero hubo un problema al guardar su información general en Azure.")
+             # Decide si continuar o fallar. Por ahora continuamos.
+        else:
+             print("[Debug] Información del libro guardada con éxito.")
+
+        print(f"[Debug] Procesamiento del libro completado con éxito para book_id: {book_id}")
+        return book_id # Devolver book_id si todo fue bien
+
+    except Exception as e:
+         # Capturar cualquier excepción durante el proceso
+         print(f"ERROR durante el procesamiento del libro '{title}': {str(e)}")
+         # Mostrar el error en la interfaz de Streamlit
+         st.error(f"Error al procesar el libro '{title}': {str(e)}")
+         return None # Indicar fallo devolviendo None
 
 #def delete_book(book_id: str) -> bool:
 #    """Elimina completamente un libro del sistema.
