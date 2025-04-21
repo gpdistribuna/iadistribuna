@@ -3,14 +3,7 @@ import os
 from utils.book_processing import get_book_info, process_book, save_book_info, delete_book
 from utils.auth import check_password
 
-# pages/_🔐_Admin.py
-
-import streamlit as st
-import os
-# Asegúrate de importar todas las funciones necesarias
-from utils.book_processing import get_book_info, process_book, delete_book
-from utils.auth import check_password # Asumiendo que check_password está en auth.py
-
+# Función opcional para cargar CSS si existe el archivo
 # Función opcional para cargar CSS si existe el archivo
 def load_css():
     """Carga un archivo CSS si existe en la ruta especificada."""

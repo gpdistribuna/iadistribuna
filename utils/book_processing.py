@@ -47,7 +47,7 @@ def split_text_into_chunks(text: str) -> List[str]:
 #    from langchain.embeddings.openai import OpenAIEmbeddings
 #    from langchain.vectorstores import FAISS
     
-    # Obtener API key desde variable de entorno
+   
 #    openai_api_key = os.getenv("OPENAI_API_KEY")
 #    if not openai_api_key:
 #        raise ValueError("No se encontró la API key de OpenAI. Configura la variable de entorno OPENAI_API_KEY.")
